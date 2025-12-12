@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>E-LibN • Digital Library</title>
+
+<style>
+/* ------------------------------ GLOBAL CYBER DARK THEME ------------------------------ */
+:root {
+  --bg: #0d0d11;
+  --card: #1a1a22;
+  --text: #eaeaf5;
+  --accent: #7b4bff;
+  --accent-glow: 0 0 12px #7b4bff;
+  --accent-glow-lg: 0 0 22px #7b4bff;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  transition: 0.3s;
+  position: relative;
+}
+
+/* Animated background gradient */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 20% 50%, rgba(123, 75, 255, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(123, 75, 255, 0.06) 0%, transparent 50%);
+  animation: gradientShift 15s ease infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes gradientShift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-10%, -10%); }
+}
+
+/* Smooth fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInFromLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.content {
+  display: none;
+  animation: fadeIn 0.5s ease forwards;
+  position: relative;
+  z-index: 1;
+}
+
+.content.active {
+  display: block;
+}
+
+/* POPUP */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.popup-content {
+  background: linear-gradient(135deg, #1a1a22 0%, #252532 100%);
+  padding: 30px;
+  width: 380px;
+  border-radius: 16px;
+  text-align: center;
+  border: 1px solid #7b4bff;
+  box-shadow: 0 0 30px rgba(123, 75, 255, 0.4), 0 10px 40px rgba(0,0,0,0.6);
+  animation: scaleIn 0.4s ease;
+  position: relative;
+}
+
+.popup-content h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #7b4bff, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: pulse 2s ease infinite;
+}
+
+.moving-btn {
+  position: absolute;
+  transition: 0.18s ease;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  color: white;
+  transition: 0.3s ease;
+  opacity: 0.7;
+}
+
+.close-btn:hover {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+/* ------------------------------ NAV BAR ------------------------------ */
+nav {
+  background: rgba(20, 20, 30, 0.85);
+  backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(123, 75, 255, 0.2);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  animation: slideInFromLeft 0.6s ease;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 20px;
+}
+
+.nav-item {
+  animation: fadeIn 0.6s ease forwards;
+  animation-delay: calc(var(--i) * 0.1s);
+  opacity: 0;
+}
+
+.nav-item:nth-child(1) { --i: 1; }
+.nav-item:nth-child(2) { --i: 2; }
+.nav-item:nth-child(3) { --i: 3; }
+.nav-item:nth-child(4) { --i: 4; }
+
+.nav-item a {
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #bfbfe5;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(123, 75, 255, 0.3), transparent);
+  transition: 0.5s;
+}
+
+.nav-item a:hover::before {
+  left: 100%;
+}
+
+.nav-item.active a,
+.nav-item a:hover {
+  color: white;
+  background: rgba(123, 75, 255, 0.25);
+  box-shadow: var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+/* ------------------------------ CARD STYLE ------------------------------ */
+.card {
+  max-width: 1100px;
+  margin: 50px auto;
+  background: linear-gradient(135deg, var(--card) 0%, rgba(26, 26, 34, 0.95) 100%);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  border: 1px solid rgba(123, 75, 255, 0.15);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  animation: scaleIn 0.6s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, transparent, rgba(123, 75, 255, 0.1), transparent);
+  border-radius: 20px;
+  z-index: -1;
+  opacity: 0;
+  transition: 0.4s;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 48px rgba(123, 75, 255, 0.3), 0 0 60px rgba(123, 75, 255, 0.15);
+  border-color: rgba(123, 75, 255, 0.4);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card h1 {
+  font-size: 2.5em;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, #ffffff, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: slideInFromLeft 0.6s ease;
+}
+
+.card h2 {
+  font-size: 1.8em;
+  margin-top: 25px;
+  margin-bottom: 12px;
+  color: #a78bfa;
+  animation: slideInFromRight 0.6s ease;
+  position: relative;
+  display: inline-block;
+}
+
+.card h2::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  border-radius: 2px;
+  animation: shimmer 2s ease infinite;
+  background-size: 1000px 100%;
+}
+
+.card p {
+  line-height: 1.8;
+  margin-bottom: 15px;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+  animation-delay: 0.2s;
+}
+
+
+/* ------------------------------ SUMMARY TOOL ------------------------------ */
+textarea {
+  width: 100%;
+  background: #12121a;
+  border: 2px solid #2d2d3b;
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  resize: vertical;
+  margin-bottom: 10px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  min-height: 150px;
+  animation: fadeIn 0.6s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(123, 75, 255, 0.3);
+  background: #15151d;
+  animation: pulse 0.3s ease;
+}
+
+select {
+  background: #12121a;
+  border: 2px solid #2d2d3b;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  margin-bottom: 10px;
+  animation: fadeIn 0.7s ease;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(123, 75, 255, 0.3);
+}
+
+button {
+  background: linear-gradient(135deg, var(--accent), #9d6fff);
+  border: none;
+  padding: 12px 32px;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(123, 75, 255, 0.4);
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.8s ease;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+}
+
+button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(123, 75, 255, 0.6);
+  animation: bounce 0.5s ease;
+}
+
+button:active {
+  transform: translateY(-1px);
+}
+
+.summary-box {
+  background: linear-gradient(135deg, #12121a 0%, #1a1a24 100%);
+  border: 2px solid #2d2d3b;
+  padding: 24px;
+  border-radius: 14px;
+  margin-top: 20px;
+  min-height: 150px;
+  transition: 0.3s ease;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+  animation: fadeIn 0.9s ease;
+}
+
+.summary-box:hover {
+  border-color: rgba(123, 75, 255, 0.3);
+}
+
+.feedback-box, .review-card {
+  background: linear-gradient(135deg, #15151d 0%, #1d1d28 100%);
+  padding: 18px 20px;
+  border-radius: 12px;
+  border-left: 4px solid var(--accent);
+  margin-top: 14px;
+  animation: slideInFromRight 0.5s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.feedback-box:hover, .review-card:hover {
+  transform: translateX(8px);
+  box-shadow: 0 6px 20px rgba(123, 75, 255, 0.2);
+  border-left-width: 6px;
+}
+
+.spinner {
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  border: 3px solid #444;
+  border-top-color: var(--accent);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Decorative elements */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(123, 75, 255, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  animation: pulse 3s ease infinite;
+}
+
+/* Quiz completion message */
+.quiz-complete {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: linear-gradient(135deg, #1a1a22 0%, #252532 100%);
+  padding: 40px;
+  border-radius: 20px;
+  border: 2px solid #7b4bff;
+  box-shadow: 0 0 50px rgba(123, 75, 255, 0.6);
+  z-index: 3000;
+  text-align: center;
+  animation: scaleIn 0.5s ease forwards;
+}
+
+.quiz-complete h2 {
+  font-size: 2.5em;
+  background: linear-gradient(135deg, #7b4bff, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+  animation: bounce 1s ease infinite;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .card {
+    padding: 25px;
+    margin: 30px 20px;
+  }
+  
+  .card h1 {
+    font-size: 2em;
+  }
+  
+  .nav-container {
+    gap: 6px;
+  }
+  
+  .nav-item a {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .popup-content {
+    width: 90%;
+    max-width: 350px;
+  }
+}
+/* -------------------- Floating Background Images -------------------- */
+.floating-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.float-img {
+  position: absolute;
+  border-radius: 12px;
+  opacity: 0.15;
+  transition: transform 2s ease-in-out;
+  animation: floatAnim 8s ease-in-out infinite alternate;
+}
+
+.float-left {
+  left: 5%;
+  top: 20%;
+  width: 150px;
+}
+
+.float-right {
+  right: 5%;
+  top: 25%;
+  width: 180px;
+}
+.float-random {
+  width: 120px;
+  left: calc(10% + 80% * var(--i, 1));
+  top: calc(10% + 50% * var(--i, 1));
+  animation-duration: calc(6s + (var(--i, 1) * 2s));
+}
+
+
+
+@keyframes floatAnim {
+  0% { transform: translateY(0px) rotate(0deg) scale(1); opacity: 0.15; }
+  50% { transform: translateY(-20px) rotate(15deg) scale(1.05); opacity: 0.2; }
+  100% { transform: translateY(0px) rotate(-10deg) scale(1); opacity: 0.15; }
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- --------------------------- POPUP AD ---------------------------- -->
+<div id="popup" class="popup">
+  <div class="popup-content">
+    <span class="close-btn" onclick="closePopup()">&times;</span>
+    <h3>DAILY QUIZ !!!!</h3>
+    <br>
+    <p>Want to have a short quiz ??</p>
+    <br>
+
+    <button id="yesBtn">YES</button>
+    <button id="noBtn" class="moving-btn">NO</button>
+  </div>
+</div>
+
+<!-- --------------------------- NAVIGATION ---------------------------- -->
+<nav>
+  <div class="nav-container">
+    <div class="nav-item active" data-section="home"><a onclick="showSection('home')">Home</a></div>
+    <div class="nav-item" data-section="top100"><a onclick="showSection('top100')">Top Books</a></div>
+    <div class="nav-item" data-section="summary"><a onclick="showSection('summary')">AI Summary</a></div>
+    <div class="nav-item" data-section="reviewsAndSuggestions"><a onclick="showSection('reviewsAndSuggestions')">Reviews & Suggestions</a></div>
+  </div>
+</nav>
+
+<!-- --------------------------- HOME ---------------------------- -->
+<div id="home" class="content active">
+  <div class="card">
+    <h1>Welcome to E-LibN</h1>
+    <p>Your digital gateway to the world's greatest literature.</p>
+    <p>This platform provides free access to knowledge and guides beginner readers to the right books. Explore literature, summaries, reviews, and more—everything at no cost.</p>
+    
+    <h2>Core Highlights</h2>
+
+    <p>• Top 100 Books of All Time<br>
+       • Clean, minimal UI<br>
+       • AI-powered summary generator<br>
+       • User reviews & suggestions<br>
+       • Beginner-friendly reading guide</p>
+
+    <p>This website is all about the knowledge, one can obtain for free!!</p>
+    <p>This website could guide you about the various books you should be reading. </p>
+    <p>There are so many functions that the website serves you without any cost.</p> 
+    <p>Isn't it fascinating ??</p>
+    <p>This website is generally made for the beginner readers, who finds literature. </p>
+    <br>
+
+    <h2>Short & Simple Version</h2>
+    <p>
+        <strong>Welcome to E-LibN — your digital gateway to the world's greatest literature.</strong><br>
+        Our e-library brings together the <strong>Top 100 Books of All Time</strong>, along with a growing collection of 
+        classics, modern masterpieces, and essential reads. Whether you're a student, a curious reader, or a lifelong 
+        learner, E-LibN gives you instant access to timeless knowledge and powerful stories—all in one place.
+    </p>
+
+    <br>
+
+    <h2>Professional Version</h2>
+    <p>
+        <strong>E-LibN is a curated digital library designed to make reading accessible, organized, and enjoyable.</strong><br>
+        Our platform highlights the <strong>Top 100 Books of All Time</strong>, selected for their cultural impact, literary 
+        excellence, and enduring relevance. Each title is thoughtfully categorized to help you explore genres, authors, 
+        and themes with ease. We believe in the power of reading to inspire growth, creativity, and knowledge—and E-LibN 
+        is built to bring that experience directly to your screen.
+    </p>
+
+    <br>
+
+    <h2>Creative & Engaging Version</h2>
+    <p>
+        <strong>Step into E-LibN, where the world's most influential books live at your fingertips.</strong><br>
+        From timeless classics to transformative modern works, our "Top 100 Books of All Time" collection is the heart of 
+        this digital library. Whether you want to study, discover something new, or immerse yourself in legendary stories, 
+        E-LibN gives you a beautifully organized space to read, explore, and grow.
+    </p>
+
+    <br>
+
+    <h2>Developer/Project Description Version</h2>
+    <p>
+        <strong>E-LibN is a web-based e-library created to provide readers with a clean, accessible, and user-friendly 
+        platform for exploring iconic literature.</strong><br>
+        Featuring a dedicated section for the <strong>Top 100 Books of All Time</strong>, the website focuses on simplicity, 
+        structured organization, and smooth navigation. E-LibN's mission is to bring essential books to readers around the 
+        world in a digital format that is easy to use, visually appealing, and available anytime.
+    </p>
+
+    <br>
+
+  </div>
+</div>
+
+<!-- --------------------------- TOP 100 ---------------------------- -->
+<style>
+  /* ========== BOOK CARD ANIMATIONS & HOVER ========== */
+  .book-card {
+    position: relative;
+    overflow: hidden;
+    background: #1a1a22;
+    border-radius: 12px;
+    padding: 15px;
+    transition: 0.35s ease;
+    cursor: pointer;
+  }
+
+  .book-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+  }
+
+  .book-card img {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: 0.3s ease;
+  }
+
+  .book-card:hover img {
+    opacity: 0.85;
+  }
+
+  /* Slide-up description */
+  .book-desc {
+    position: absolute;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    background: rgba(10, 10, 14, 0.92);
+    backdrop-filter: blur(6px);
+    color: #eaeaf5;
+    padding: 15px;
+    font-size: 0.80rem;
+    line-height: 1.35rem;
+    transition: all 0.4s ease-in-out;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .book-card:hover .book-desc {
+    bottom: 0;
+  }
+
+  .read-more-btn {
+    margin-top: 10px;
+    display: inline-block;
+    padding: 6px 12px;
+    background: #3a3a4a;
+    color: #fff;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.3s ease;
+  }
+
+  .read-more-btn:hover {
+    background: #5b5bcf;
+  }
+
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+  }
+
+  .book-section h2 {
+    margin-top: 40px;
+  }
+
+  .book-footer-note {
+    margin-top: 40px;
+    padding: 15px;
+    text-align: center;
+    color: #d4d4df;
+    font-size: 0.95rem;
+    border-top: 1px solid #333;
+  }
+</style>
+
+
+
+<div id="top100" class="content">
+  <div class="card" id="top100-section">
+    <h1>Top Books of All Time</h1>
+    <p class="section-subtitle">A curated collection of timeless classics and modern masterpieces. </p>
+
+
+
+    <!-- ---------------- TOP 10 GREATEST NOVELS ---------------- -->
+    <div class="book-section">
+      <h2>📖 Top 10 Greatest Novels of All Time</h2>
+      <div class="book-grid">
+
+        <div class="book-card">
+          <img src="w.jpeg">
+          <h3>Don Quixote</h3>
+          <p>Miguel de Cervantes</p>
+          <div class="book-desc">
+            A satirical masterpiece exploring idealism, identity, and the blurred lines between illusion and reality.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Don_Quixote">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="e.jpeg">
+          <h3>War and Peace</h3>
+          <p>Leo Tolstoy</p>
+          <div class="book-desc">
+            An epic saga fusing war, romance, politics, and philosophy during the Napoleonic invasion of Russia.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/War_and_Peace">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="su.jpeg">
+          <h3>Pride and Prejudice</h3>
+          <p>Jane Austen</p>
+          <div class="book-desc">
+            A witty critique of social class and marriage through the vibrant Elizabeth Bennet and Mr. Darcy.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Pride_and_Prejudice">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="gg.jpeg">
+          <h3>1984</h3>
+          <p>George Orwell</p>
+          <div class="book-desc">
+            A chilling dystopia exposing authoritarian control, propaganda, and loss of individual freedom.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Nineteen_Eighty-Four">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="q.jpeg">
+          <h3>Moby-Dick</h3>
+          <p>Herman Melville</p>
+          <div class="book-desc">
+            An intense examination of obsession, human struggle, and man’s confrontation with nature.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Moby-Dick">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="y.jpeg">
+          <h3>The Great Gatsby</h3>
+          <p>F. Scott Fitzgerald</p>
+          <div class="book-desc">
+            A tragic portrait of ambition, love, and the broken promises of the American Dream.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/The_Great_Gatsby">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="ga.jpeg">
+          <h3>One Hundred Years of Solitude</h3>
+          <p>Gabriel García Márquez</p>
+          <div class="book-desc">
+            A magical realist journey through generations of the Buendía family in Macondo.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/One_Hundred_Years_of_Solitude">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="cc.png">
+          <h3>Crime and Punishment</h3>
+          <p>Fyodor Dostoevsky</p>
+          <div class="book-desc">
+            A deep psychological dive into guilt, justice, suffering, and redemption.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Crime_and_Punishment">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="m.jpeg">
+          <h3>To Kill a Mockingbird</h3>
+          <p>Harper Lee</p>
+          <div class="book-desc">
+            A moving story confronting racism, morality, and human compassion in the American South.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/To_Kill_a_Mockingbird">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="io.jpeg">
+          <h3>The Hobbit</h3>
+          <p>J.R.R. Tolkien</p>
+          <div class="book-desc">
+            Bilbo Baggins embarks on a daring quest filled with adventure, magic, and mythical creatures.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/The_Hobbit">Read More</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <!-- ---------------- GREATEST NEPALI BOOKS ---------------- -->
+    <div class="book-section">
+      <h2>📖 Greatest Nepali Books of All Time</h2>
+      <div class="book-grid">
+
+        <div class="book-card">
+          <img src="p.jpeg">
+          <h3>Muna Madan</h3>
+          <p>Laxmi Prasad Devkota</p>
+          <div class="book-desc">
+            A poetic tragedy portraying love, migration, struggle, and societal realities of Nepal.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Muna_Madan">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="pls.jpeg">
+          <h3>Seto Dharti</h3>
+          <p>Amar Neupane</p>
+          <div class="book-desc">
+            A heartbreaking tale of a young widow navigating loss, silence, and emotional isolation.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Seto_Dharti">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="pp.jpeg">
+          <h3>Palpasa Café</h3>
+          <p>Narayan Wagle</p>
+          <div class="book-desc">
+            A powerful story of love and hope set during the turmoil of the Nepali civil war.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Palpasa_Cafe">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="ppp.jpeg">
+          <h3>Karnali Blues</h3>
+          <p>Buddhisagar</p>
+          <div class="book-desc">
+            A deeply emotional father-son narrative capturing rural Nepali life and memories.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Karnali_Blues">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="s.jpeg">
+          <h3>Ghumne Mechma Andho Manche</h3>
+          <p>Bishnu Prasad Sharma</p>
+          <div class="book-desc">
+            A philosophical novel exploring existential questions, human struggle, and identity.
+            <br>
+            <a class="read-more-btn" target="_blank" href="#">Read More</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <!-- ---------------- BEST BOOKS FOR STUDENTS ---------------- -->
+    <div class="book-section">
+      <h2>📖 Best Books for Students</h2>
+      <div class="book-grid">
+
+        <div class="book-card">
+          <img src="h.jpeg">
+          <h3>Atomic Habits</h3>
+          <p>James Clear</p>
+          <div class="book-desc">
+            A transformative guide on small habits, disciplined systems, and long-term productivity.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Atomic_Habits">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="r.jpeg">
+          <h3>Rich Dad Poor Dad</h3>
+          <p>Robert Kiyosaki</p>
+          <div class="book-desc">
+            A comparison of two contrasting mindsets about money, wealth building, and financial intelligence.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Rich_Dad_Poor_Dad">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="7.jpeg">
+          <h3>The 7 Habits of Highly Effective People</h3>
+          <p>Stephen Covey</p>
+          <div class="book-desc">
+            A framework for character development, productivity, and effective leadership.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="hw.png">
+          <h3>How to Win Friends & Influence People</h3>
+          <p>Dale Carnegie</p>
+          <div class="book-desc">
+            A timeless guide to communication, persuasion, and meaningful relationships.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/How_to_Win_Friends_and_Influence_People">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="ple.png">
+          <h3>Deep Work</h3>
+          <p>Cal Newport</p>
+          <div class="book-desc">
+            A philosophy for maximizing focus and eliminating distractions in the digital age.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Deep_Work">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="t.jpeg">
+          <h3>The Power of Positive Thinking</h3>
+          <p>Norman Vincent Peale</p>
+          <div class="book-desc">
+            A motivational guide emphasizing optimism and inner strength for life’s challenges.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/The_Power_of_Positive_Thinking">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="sss.jpeg">
+          <h3>Think and Grow Rich</h3>
+          <p>Napoleon Hill</p>
+          <div class="book-desc">
+            A foundational text teaching the power of belief, mindset, and ambition in success.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Think_and_Grow_Rich">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="ff.jpeg">
+          <h3>Mindset: The New Psychology of Success</h3>
+          <p>Carol Dweck</p>
+          <div class="book-desc">
+            A scientific look at fixed vs growth mindsets and how they influence human potential.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/Mindset:_The_New_Psychology_of_Success">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="ss.jpeg">
+          <h3>The Alchemist</h3>
+          <p>Paulo Coelho</p>
+          <div class="book-desc">
+            A symbolic journey of self-discovery and chasing one's dreams.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/The_Alchemist_(novel)">Read More</a>
+          </div>
+        </div>
+
+        <div class="book-card">
+          <img src="f.png">
+          <h3>The Subtle Art of Not Giving a F*</h3>
+          <p>Mark Manson</p>
+          <div class="book-desc">
+            A counterintuitive guide to living well by prioritizing what truly matters.
+            <br>
+            <a class="read-more-btn" target="_blank" href="https://en.wikipedia.org/wiki/The_Subtle_Art_of_Not_Giving_a_F*ck">Read More</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <!-- Footer Note -->
+    <div class="book-footer-note">
+      The books are available on different E-commerce websites; you can visit and buy them.
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- --------------------------- AI SUMMARY TOOL ---------------------------- -->
+<div id="summary" class="content">
+  <div class="card">
+    <h1>AI Summary Tool</h1>
+    <textarea id="inputText" rows="8" placeholder="Paste your text here..."></textarea>
+
+    <select id="summaryLength">
+      <option value="short">Short (2–3 sentences)</option>
+      <option value="medium" selected>Medium (1 paragraph)</option>
+      <option value="detailed">Detailed (2–3 paragraphs)</option>
+    </select>
+
+    <br><br>
+    <button onclick="generateSummary()">Generate Summary</button>
+
+    <h2 style="margin-top:20px;">Summary Output</h2>
+    <div id="summaryOutput" class="summary-box">Your summary will appear here...</div>
+  </div>
+</div>
+
+<!-- --------------------------- REVIEWS ---------------------------- -->
+<div id="reviewsAndSuggestions" class="content">
+  <div class="card">
+    <h1>Reviews & Suggestions</h1>
+
+    <br><br>
+    <h2>Submit Your Suggestion</h2>
+    <textarea id="feedbackInput" rows="4" placeholder="Write your feedback or review..."></textarea>
+    <button onclick="submitFeedback()">Submit</button>
+
+    <h2 style="margin-top:25px;">User Feedback</h2>
+
+    <div class="review-card"> "E-LibN's clean dark interface is stunning and easy to use."</div>
+    <div class="review-card"> "The summary tool saves me hours—accurate and fast!"</div>
+    <div class="review-card"> "I discovered many new books I never knew I needed!"</div>
+    <div class="review-card"> "This futuristic UI is BEAUTIFUL."</div>
+
+    <div class="feedback-box">"This platform feels premium—love the dark cyber theme!"</div>
+    <div class="feedback-box">"The Top 100 list is great for beginners."</div>
+    <div class="feedback-box">"Smooth animations and clean layout. Great job!"</div>
+  </div>
+</div>
+
+<!-- --------------------------- SCRIPT ---------------------------- -->
+<script>
+
+/* Show different sections */
+function showSection(id) {
+  document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.querySelector(`[data-section="${id}"]`).classList.add("active");
+}
+
+/* POPUP when scroll > 200 - only show once */
+let popupShown = false;
+window.addEventListener("scroll", function () {
+  if (window.scrollY > 200 && !popupShown) {
+    document.getElementById("popup").style.display = "flex";
+    popupShown = true;
+  }
+});
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+/* Check if returning from quiz */
+window.addEventListener('load', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('quizComplete') === 'true') {
+    // Show completion message
+    const completeDiv = document.createElement('div');
+    completeDiv.className = 'quiz-complete';
+    completeDiv.innerHTML = '<h2>🎉 Quiz Completed!</h2><p>Great job! Redirecting to home...</p>';
+    document.body.appendChild(completeDiv);
+    
+    // Remove the quiz parameter from URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+    
+    // Remove message and ensure home is shown
+    setTimeout(() => {
+      completeDiv.remove();
+      showSection('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 2000);
+  }
+});
+
+/* YES BUTTON → open quiz page */
+document.getElementById("yesBtn").addEventListener("click", function () {
+  window.location.href = "question.html";
+});
+
+/* NO BUTTON → MOVE AWAY */
+document.getElementById("noBtn").addEventListener("mouseover", function () {
+  const box = document.querySelector(".popup-content");
+
+  const maxX = box.offsetWidth - 80;
+  const maxY = box.offsetHeight - 40;
+
+  this.style.left = Math.random() * maxX + "px";
+  this.style.top = Math.random() * maxY + "px";
+});
+
+/* SUMMARY TOOL */
+async function generateSummary() {
+  const input = document.getElementById("inputText").value.trim();
+  const output = document.getElementById("summaryOutput");
+
+  if (input.length < 80) {
+    output.innerHTML = "⚠ Please enter at least 80 characters.";
+    return;
+  }
+
+  output.innerHTML = `<div class="spinner"></div> Generating summary...`;
+
+  setTimeout(() => {
+    const sentences = input.split(/(?<=[.!?])\s+/);
+    let summary = "";
+
+    if (sentences.length <= 4) {
+      summary = sentences.join(" ");
+    } else {
+      const firstTwo = sentences.slice(0, 2).join(" ");
+      const thirdLast = sentences[sentences.length - 3];
+      const last = sentences[sentences.length - 1];
+
+      summary = `${firstTwo} ${thirdLast} ${last}`;
+    }
+
+    output.innerHTML = summary || "Summary unavailable.";
+  }, 1200);
+}
+
+/* FEEDBACK SYSTEM */
+function submitFeedback() {
+  const input = document.getElementById("feedbackInput");
+  const text = input.value.trim();
+  if (text === "") return;
+
+  const container = document.querySelector("#reviewsAndSuggestions .card");
+
+  const newBox = document.createElement("div");
+  newBox.className = "feedback-box";
+  newBox.textContent = text;
+
+  container.appendChild(newBox);
+  input.value = "";
+}
+
+</script>
+
+</body>
+</html>
